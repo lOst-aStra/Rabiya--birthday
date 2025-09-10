@@ -1,0 +1,806 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Surprise for Rabia 🎉</title>
+
+<!-- Google fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --pink:#FFD6E8;
+    --lav:#E6C1FF;
+    --blush:#FFB6C1;
+    --rosegold:#FFD7A6;
+    --gold:#FFD700;
+    --deep:#2A2430;
+    --bg-intro: linear-gradient(135deg,var(--pink) 0%, var(--lav) 60%, #FFF1F8 100%);
+    --bg-celebrate: linear-gradient(180deg,#FFEAF3 0%, #F3E6FF 50%, #FFF2E6 100%);
+    --maxWidth:1200px;
+  }
+
+  html,body{
+    height:100%;
+    margin:0;
+    font-family:"Poppins",system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
+    background:var(--bg-intro);
+    color:var(--deep);
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+  }
+
+  /* Fullscreen app wrapper */
+  #app{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .full-screen{
+    position:relative;
+    width:100%;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    overflow:hidden;
+  }
+
+  /* Intro screen */
+  #intro-screen{
+    background:var(--bg-intro);
+    transition:opacity .45s ease, transform .45s ease;
+  }
+  .bg-sparkles{
+    pointer-events:none;
+    position:absolute;
+    inset:0;
+    background-image: radial-gradient(rgba(255,255,255,0.45) 0.6px, transparent 0.6px);
+    opacity:.06;
+    filter:blur(6px);
+    mix-blend-mode:screen;
+  }
+  .intro-title{
+    font-size:28px;
+    margin:0 0 20px 0;
+    letter-spacing:0.4px;
+    font-weight:600;
+    color:var(--deep);
+  }
+  #surprise-btn{
+    -webkit-tap-highlight-color:transparent;
+    background:linear-gradient(180deg,var(--rosegold),var(--blush));
+    border:none;
+    padding:22px 36px;
+    border-radius:64px;
+    font-size:28px;
+    font-weight:600;
+    color:#3a2530;
+    cursor:pointer;
+    box-shadow:0 18px 40px rgba(160,60,120,0.12);
+    position:relative;
+    overflow:hidden;
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  /* glitter overlay (subtle) */
+  #surprise-btn::after{
+    content:'';
+    position:absolute;
+    inset:0;
+    background-image:linear-gradient(90deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.14) 100%);
+    mix-blend-mode:overlay;
+    opacity:.6;
+    pointer-events:none;
+  }
+  #surprise-btn:active{ transform:scale(.96); transition:transform .12s ease; }
+  #surprise-btn:focus{ outline:3px solid rgba(255,214,160,.28); outline-offset:6px; }
+
+  .pulse {
+    animation: pulse 1600ms infinite;
+  }
+  @keyframes pulse{
+    0%{ transform:scale(1); box-shadow:0 12px 30px rgba(160,60,120,0.12); }
+    50%{ transform:scale(1.04); box-shadow:0 22px 44px rgba(160,60,120,0.18); }
+    100%{ transform:scale(1); box-shadow:0 12px 30px rgba(160,60,120,0.12); }
+  }
+
+  .intro-subtext{ margin-top:14px; color:rgba(42,36,48,0.6); }
+
+  /* Celebration screen */
+  #celebration-screen{
+    position:fixed;
+    inset:0;
+    background:var(--bg-celebrate);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    gap:18px;
+    padding:28px;
+    opacity:0;
+    transform:translateY(6px) scale(.995);
+    pointer-events:none;
+  }
+  #celebration-screen.visible{ opacity:1; transform:none; pointer-events:auto; transition:opacity .6s ease, transform .6s ease; }
+
+  /* canvas wrapper for fireworks */
+  #particles-canvas-wrapper{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+  }
+  #particles-canvas{
+    width:100%;
+    height:100%;
+    display:block;
+  }
+
+  .celebration-content{
+    z-index:20;
+    width:100%;
+    max-width:var(--maxWidth);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:40px;
+    flex-direction:column;
+    padding:18px;
+  }
+
+  /* greeting */
+  .greeting-wrap{ position:relative; height:120px; display:flex; align-items:center; justify-content:center; }
+  #greeting{
+    font-family:"Great Vibes", "Brush Script MT", cursive;
+    font-weight:400;
+    font-size:clamp(40px,8vw,84px);
+    color: #3a1f33;
+    margin:0;
+    line-height:1;
+    text-align:center;
+    text-shadow: 0 6px 24px rgba(255,183,197,0.18), 0 2px 6px rgba(255,214,160,0.08);
+    position:relative;
+  }
+  /* sweep sparkle */
+  #greeting.sweep::after{
+    content:'';
+    position:absolute;
+    left:-30%;
+    top:0;
+    width:160%;
+    height:100%;
+    background:linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+    transform:translateX(-100%);
+    mix-blend-mode:screen;
+    animation: sweep 1100ms cubic-bezier(.22,1,.36,1) 1;
+  }
+  @keyframes sweep{
+    0%{ transform:translateX(-100%); opacity:1; }
+    100%{ transform:translateX(100%); opacity:0; }
+  }
+
+  /* portrait + cake wrap */
+  .portrait-cake-wrap{
+    display:flex;
+    gap:32px;
+    align-items:flex-end;
+    justify-content:center;
+    width:100%;
+    padding:8px;
+    flex-wrap:wrap;
+  }
+  #portrait-frame{
+    width:320px;
+    height:420px;
+    border-radius:20px;
+    overflow:hidden;
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.2));
+    box-shadow:0 18px 46px rgba(60,20,40,0.12);
+    transition:transform .7s cubic-bezier(.22,1,.36,1), opacity .6s ease;
+    transform-origin:center center;
+  }
+  #portrait-frame.hidden{ transform:scale(.9); opacity:0; }
+  #portrait-frame img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+
+  /* glow ring */
+  .portrait-glow{
+    position:absolute;
+    inset:0;
+    border-radius:20px;
+    pointer-events:none;
+    box-shadow: 0 0 40px 6px rgba(255,182,200,0.18);
+    opacity:0;
+    transform:scale(.95);
+    transition:opacity .7s ease, transform .7s ease;
+  }
+  .portrait-glow.on{ opacity:1; transform:scale(1); filter:blur(6px); }
+
+  /* cake area: simple svg container */
+  #cake-area{
+    width:320px;
+    max-width:44vw;
+    min-width:220px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+  }
+
+  .controls{
+    margin-top:12px;
+    display:flex;
+    gap:12px;
+    align-items:center;
+  }
+  .btn{
+    border:none;
+    padding:10px 16px;
+    border-radius:10px;
+    font-weight:600;
+    cursor:pointer;
+    background:#fff;
+    box-shadow:0 8px 20px rgba(30,20,40,0.08);
+  }
+  .btn.primary{
+    background:linear-gradient(90deg,var(--blush),var(--lav));
+  }
+
+  /* Candles/flame visuals */
+  .candle-flame{
+    opacity:0;
+    transform-origin:bottom center;
+    transform:scaleY(.6);
+    transition:opacity .22s ease, transform .22s cubic-bezier(.22,1,.36,1);
+    filter:drop-shadow(0 8px 10px rgba(255,170,100,0.08));
+  }
+  .candle-flame.lit{
+    opacity:1;
+    transform:scaleY(1);
+    animation: flicker 600ms infinite;
+  }
+  @keyframes flicker{
+    0%{ transform:scaleY(1); }
+    40%{ transform:scaleY(1.02) translateY(-1px); }
+    100%{ transform:scaleY(.98); }
+  }
+
+  /* floating sparkles overlay */
+  .floating-sparkles{
+    pointer-events:none;
+    position:absolute;
+    inset:0;
+    z-index:10;
+    overflow:hidden;
+  }
+  .spark{
+    position:absolute;
+    width:6px;
+    height:6px;
+    background: radial-gradient(circle at 30% 30%, #fff, transparent 30%);
+    border-radius:50%;
+    opacity:0.0;
+    transform:translateY(0);
+    animation: floatUp linear infinite;
+  }
+  @keyframes floatUp{
+    from { transform: translateY(10px) scale(.8); opacity:.0; }
+    10% { opacity:.9; }
+    100% { transform: translateY(-120px) scale(0.6); opacity:0; }
+  }
+
+  /* responsive */
+  @media (max-width:720px){
+    .portrait-cake-wrap{ gap:12px; }
+    #portrait-frame{ width:260px; height:360px; }
+    #greeting{ font-size:clamp(28px,8vw,56px); }
+    #celebration-screen{ padding:10px; }
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce){
+    * { animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important; scroll-behavior:auto !important; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- INTRO -->
+  <section id="intro-screen" class="full-screen" aria-hidden="false">
+    <div class="bg-sparkles" aria-hidden="true"></div>
+    <h1 class="intro-title">A special surprise for Rabia</h1>
+    <button id="surprise-btn" class="pulse" aria-label="Open surprise">Tap for a surprise 🎁</button>
+    <div class="intro-subtext">Just one tap — then enjoy the celebration 🎉</div>
+  </section>
+
+  <!-- CELEBRATION -->
+  <section id="celebration-screen" class="full-screen" aria-hidden="true">
+    <div id="particles-canvas-wrapper"><canvas id="particles-canvas"></canvas></div>
+
+    <div class="floating-sparkles" aria-hidden="true"></div>
+
+    <div class="celebration-content" role="main" aria-live="polite">
+      <div class="greeting-wrap">
+        <h2 id="greeting" aria-live="polite" aria-atomic="true"></h2>
+      </div>
+
+      <div class="portrait-cake-wrap">
+        <div id="portrait-frame" class="hidden" aria-hidden="true">
+          <!-- Replace src with your anime-styled portrait path -->
+          <img id="anime-portrait" src="assets/rabia-anime.png" alt="Rabia portrait (anime style)">
+          <div class="portrait-glow" id="portrait-glow" aria-hidden="true"></div>
+        </div>
+
+        <div id="cake-area" aria-hidden="true">
+          <!-- Simple stylized cake SVG (3 candles). Flames animated by JS by toggling .lit -->
+          <svg id="cake-svg" width="320" viewBox="0 0 320 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Birthday cake">
+            <!-- cake body -->
+            <g id="cake-body">
+              <rect x="30" y="80" width="260" height="80" rx="20" fill="#ffeef6" stroke="#ffd6e8" stroke-width="2"/>
+              <rect x="60" y="120" width="200" height="70" rx="18" fill="#fff" stroke="#f6d6e6" stroke-width="2"/>
+            </g>
+
+            <!-- decorations -->
+            <g transform="translate(0,0)">
+              <circle cx="80" cy="160" r="8" fill="#ffd6e8"/>
+              <circle cx="130" cy="150" r="8" fill="#ffd7a6"/>
+              <circle cx="190" cy="152" r="8" fill="#ffb6c1"/>
+              <circle cx="250" cy="160" r="8" fill="#f3e6ff"/>
+            </g>
+
+            <!-- Candles group -->
+            <g id="candles">
+              <!-- Candle 1 -->
+              <g transform="translate(100,72)" class="candle">
+                <rect x="-6" y="0" width="12" height="20" rx="2" fill="#ffb6c1"/>
+                <g class="candle-flame" id="flame1">
+                  <path d="M0 -6 C 3 -4 3 -1 0 2 C -3 -1 -3 -4 0 -6 Z" fill="#ffd77a"/>
+                </g>
+              </g>
+
+              <!-- Candle 2 -->
+              <g transform="translate(160,72)" class="candle">
+                <rect x="-6" y="0" width="12" height="20" rx="2" fill="#ffd7a6"/>
+                <g class="candle-flame" id="flame2">
+                  <path d="M0 -6 C 3 -4 3 -1 0 2 C -3 -1 -3 -4 0 -6 Z" fill="#ffd77a"/>
+                </g>
+              </g>
+
+              <!-- Candle 3 -->
+              <g transform="translate(220,72)" class="candle">
+                <rect x="-6" y="0" width="12" height="20" rx="2" fill="#ffd6e8"/>
+                <g class="candle-flame" id="flame3">
+                  <path d="M0 -6 C 3 -4 3 -1 0 2 C -3 -1 -3 -4 0 -6 Z" fill="#ffd77a"/>
+                </g>
+              </g>
+            </g>
+          </svg>
+        </div>
+      </div>
+
+      <div class="controls" style="margin-top:8px;">
+        <button id="wish-btn" class="btn primary" aria-label="Make a wish">Make a wish ✨</button>
+        <button id="download-btn" class="btn" aria-label="Download image">Download image</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+/*
+  Full interactive script:
+  - seq: press -> small burst -> fade intro -> show celebration -> fireworks -> typed greeting -> portrait reveal -> cake + candle lighting -> final confetti
+  - moderate particle system implemented in canvas for fireworks and confetti
+*/
+
+// helpers
+function delay(ms){ return new Promise(r=>setTimeout(r, ms)); }
+const clamp = (v,m,M)=> Math.max(m, Math.min(M, v));
+
+// DOM refs
+const intro = document.getElementById('intro-screen');
+const celebrate = document.getElementById('celebration-screen');
+const surpriseBtn = document.getElementById('surprise-btn');
+const greetingEl = document.getElementById('greeting');
+const portraitFrame = document.getElementById('portrait-frame');
+const portraitGlow = document.getElementById('portrait-glow');
+const cakeArea = document.getElementById('cake-area');
+const flameEls = [document.getElementById('flame1'), document.getElementById('flame2'), document.getElementById('flame3')];
+const wishBtn = document.getElementById('wish-btn');
+const downloadBtn = document.getElementById('download-btn');
+
+const canvas = document.getElementById('particles-canvas');
+const ctx = canvas.getContext('2d');
+let W=innerWidth, H=innerHeight;
+canvas.width = W * devicePixelRatio;
+canvas.height = H * devicePixelRatio;
+canvas.style.width = W+'px';
+canvas.style.height = H+'px';
+ctx.scale(devicePixelRatio, devicePixelRatio);
+
+let particles = [];
+let confettiActive = false;
+let animRunning = true;
+
+// handle resize
+window.addEventListener('resize', ()=> {
+  W = innerWidth; H = innerHeight;
+  canvas.width = W * devicePixelRatio;
+  canvas.height = H * devicePixelRatio;
+  canvas.style.width = W+'px'; canvas.style.height = H+'px';
+  ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+});
+
+// particle constructors
+class Particle {
+  constructor(x,y, vx, vy, life, size, color, shape='circle'){
+    this.x=x; this.y=y; this.vx=vx; this.vy=vy;
+    this.life=life; this.ttl=life; this.size=size; this.color=color; this.shape=shape;
+    this.angle = Math.random()*Math.PI*2;
+    this.spin = (Math.random()-0.5)*0.1;
+  }
+  step(dt){
+    this.ttl -= dt;
+    if(this.ttl<=0) return false;
+    this.vy += 0.06 * dt; // gravity
+    this.x += this.vx * dt;
+    this.y += this.vy * dt;
+    this.angle += this.spin * dt;
+    return true;
+  }
+  draw(ctx){
+    const t = Math.max(0, this.ttl / this.life);
+    ctx.save();
+    ctx.globalAlpha = clamp(t*1.1, 0, 1);
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.angle);
+    if(this.shape==='star'){
+      // small 4-point star
+      ctx.beginPath();
+      ctx.moveTo(-this.size/2,0);
+      ctx.lineTo(0,-this.size/2);
+      ctx.lineTo(this.size/2,0);
+      ctx.lineTo(0,this.size/2);
+      ctx.closePath();
+      ctx.fillStyle=this.color; ctx.fill();
+    } else if(this.shape==='heart'){
+      // simple heart-ish shape
+      ctx.beginPath();
+      ctx.moveTo(0, -this.size/4);
+      ctx.bezierCurveTo(this.size/2,-this.size*0.9, this.size*1.1, -this.size/6, 0, this.size/2);
+      ctx.bezierCurveTo(-this.size*1.1, -this.size/6, -this.size/2,-this.size*0.9, 0, -this.size/4);
+      ctx.closePath();
+      ctx.fillStyle=this.color; ctx.fill();
+    } else {
+      ctx.beginPath();
+      ctx.arc(0,0, this.size/2, 0, Math.PI*2);
+      ctx.fillStyle=this.color; ctx.fill();
+    }
+    ctx.restore();
+  }
+}
+
+// particle system update
+let lastTs = performance.now();
+function loop(ts){
+  if(!animRunning) return;
+  const dt = Math.min(60, ts-lastTs);
+  lastTs = ts;
+  // clear
+  ctx.clearRect(0,0,W,H);
+  // step particles
+  const dtRatio = dt / 16.666;
+  particles = particles.filter(p => {
+    const alive = p.step(dtRatio);
+    if(alive) p.draw(ctx);
+    return alive;
+  });
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+// spawn confetti burst
+function spawnBurst(x,y, count=100){
+  const colors = ['#FFD700','#FFB6C1','#E6C1FF','#FFD6E8','#F3E6FF'];
+  for(let i=0;i<count;i++){
+    const ang = Math.random()*Math.PI*2;
+    const speed = 3 + Math.random()*6;
+    const vx = Math.cos(ang)*speed;
+    const vy = Math.sin(ang)*speed;
+    const size = 4 + Math.random()*8;
+    const col = colors[Math.floor(Math.random()*colors.length)];
+    const shape = Math.random() < 0.14 ? 'heart' : (Math.random() < 0.22 ? 'star' : 'circle');
+    particles.push(new Particle(x + (Math.random()-0.5)*20, y + (Math.random()-0.5)*20, vx, vy, 60 + Math.random()*40, size, col, shape));
+  }
+}
+
+// small sparkles from button
+function spawnButtonSparks(rect){
+  const cx = rect.left + rect.width/2;
+  const cy = rect.top + rect.height/2;
+  const count = 28;
+  for(let i=0;i<count;i++){
+    const ang = (-Math.PI/2) + (Math.random()-0.5)*Math.PI*1.2;
+    const speed = 2 + Math.random()*5;
+    const vx = Math.cos(ang)*speed;
+    const vy = Math.sin(ang)*speed;
+    particles.push(new Particle(cx + (Math.random()-0.5)*10, cy + (Math.random()-0.5)*8, vx, vy, 36 + Math.random()*24, 3+Math.random()*4, '#fff', 'star'));
+  }
+}
+
+// fireworks sequence helper
+async function fireworksBurstMulti(count=3){
+  for(let i=0;i<count;i++){
+    const x = W*0.25 + Math.random()*W*0.5;
+    const y = H*0.2 + Math.random()*H*0.3;
+    spawnBurst(x,y, 60 + Math.floor(Math.random()*80));
+    await delay(220 + Math.random()*200);
+  }
+}
+
+// typed greeting
+async function typeGreeting(text, speed=45){
+  greetingEl.textContent = '';
+  for(let i=0;i<text.length;i++){
+    greetingEl.textContent += text[i];
+    // per-char slight animation: add and remove sweep class quickly for effect
+    await delay(speed);
+  }
+  greetingEl.classList.add('sweep');
+  // remove sweep class after animation so it can replay later
+  setTimeout(()=> greetingEl.classList.remove('sweep'), 1200);
+  await delay(350);
+}
+
+// reveal portrait & glow
+async function revealPortrait(){
+  portraitFrame.classList.remove('hidden');
+  portraitFrame.style.transform = 'scale(.95)';
+  // give it slightly larger then settle
+  await delay(80);
+  portraitFrame.style.transform = 'scale(1.05)';
+  portraitGlow.classList.add('on');
+  await delay(500);
+  portraitFrame.style.transform = 'scale(1)';
+  await delay(260);
+}
+
+// light candles sequentially
+async function lightCandlesSequentially(){
+  cakeArea.setAttribute('aria-hidden', 'false');
+  for(let i=0;i<flameEls.length;i++){
+    const flame = flameEls[i];
+    flame.classList.add('lit');
+    // small spark burst near flame position
+    // approximate position: get bounding rect of cake svg + candle transform
+    const rect = document.getElementById('cake-svg').getBoundingClientRect();
+    const candleX = rect.left + (100 + (i*60)); // approximated
+    const candleY = rect.top + 72;
+    spawnBurst(candleX, candleY - 10, 18);
+    await delay(260);
+  }
+}
+
+// final confetti shower
+function finalShower(){
+  const centerX = W*0.5;
+  const topY = H*0.12;
+  spawnBurst(centerX, topY, 140);
+  // long gentle glitter
+  for(let i=0;i<60;i++){
+    const x = Math.random()*W;
+    const y = Math.random()*H*0.4;
+    particles.push(new Particle(x, y, (Math.random()-0.5)*0.3, 0.5 + Math.random()*1.2, 120 + Math.random()*80, 3 + Math.random()*4, '#fff', 'star'));
+  }
+}
+
+// small floating DOM sparkles for visual depth
+function populateDomSparkles(){
+  const container = document.querySelector('.floating-sparkles');
+  for(let i=0;i<22;i++){
+    const el = document.createElement('div');
+    el.className='spark';
+    el.style.left = Math.random()*100+'%';
+    el.style.top = 40 + Math.random()*50+'%';
+    el.style.width = (4 + Math.random()*8)+'px';
+    el.style.height = el.style.width;
+    el.style.animationDuration = (4 + Math.random()*5)+'s';
+    el.style.animationDelay = (Math.random()*2)+'s';
+    container.appendChild(el);
+  }
+}
+populateDomSparkles();
+
+// main sequence triggered by button
+surpriseBtn.addEventListener('click', async function onClick(e){
+  // prevent double-run
+  surpriseBtn.disabled = true;
+  surpriseBtn.classList.remove('pulse');
+  // small press animation and sparks from the button
+  surpriseBtn.style.transform = 'scale(.94)';
+  spawnButtonSparks(surpriseBtn.getBoundingClientRect());
+  await delay(140);
+  surpriseBtn.style.transform = '';
+
+  // transition intro -> celebration
+  intro.style.opacity = '0';
+  intro.style.transform = 'translateY(-10px) scale(.995)';
+  // reveal celebration
+  celebrate.classList.add('visible');
+  celebrate.setAttribute('aria-hidden','false');
+  // start fireworks
+  await fireworksBurstMulti(3);
+
+  // type greeting
+  await typeGreeting('Happy Birthday Rabia!', 36);
+
+  // portrait reveal
+  await revealPortrait();
+
+  // short delay then cake & candles
+  await delay(260);
+  await lightCandlesSequentially();
+
+  // final burst
+  finalShower();
+
+  // show controls accessible (ensure aria)
+  wishBtn.focus();
+});
+
+// Make a wish button triggers another small sequence
+wishBtn.addEventListener('click', async ()=>{
+  // small celebratory burst at portrait top
+  const rect = portraitFrame.getBoundingClientRect();
+  const x = rect.left + rect.width/2;
+  const y = rect.top + rect.height*0.12;
+  spawnBurst(x,y, 80);
+  // little typed mini message
+  const prev = greetingEl.textContent;
+  await typeGreeting('Make a wish ✨');
+  await delay(700);
+  greetingEl.textContent = prev;
+});
+
+// Download button: render portrait + greeting onto canvas and download
+downloadBtn.addEventListener('click', async ()=>{
+  downloadBtn.disabled = true;
+  try {
+    await downloadPortraitComposite();
+  } catch(e){
+    console.error(e);
+  }
+  downloadBtn.disabled = false;
+});
+
+// Draw portrait + greeting -> download PNG
+async function downloadPortraitComposite(){
+  const img = document.getElementById('anime-portrait');
+  // make an offscreen canvas
+  const outW = 1080;
+  const outH = 1350;
+  const oc = document.createElement('canvas');
+  oc.width = outW; oc.height = outH;
+  const octx = oc.getContext('2d');
+  // bg
+  const g = octx.createLinearGradient(0,0,0,outH);
+  g.addColorStop(0,'#FFEAF3'); g.addColorStop(0.5, '#F3E6FF'); g.addColorStop(1,'#FFF2E6');
+  octx.fillStyle = g;
+  octx.fillRect(0,0,outW,outH);
+
+  // draw subtle sparkles background
+  for(let i=0;i<140;i++){
+    octx.globalAlpha = 0.06 + Math.random()*0.14;
+    octx.fillStyle = ['#FFD6E8','#E6C1FF','#FFD7A6'][Math.floor(Math.random()*3)];
+    const rx = Math.random()*outW, ry = Math.random()*outH;
+    const r = Math.random()*6;
+    octx.beginPath(); octx.arc(rx,ry,r,0,Math.PI*2); octx.fill();
+  }
+  octx.globalAlpha = 1;
+
+  // draw image (fit width)
+  // wait until img is loaded
+  await new Promise((res,rej)=>{
+    if(img.complete && img.naturalWidth !== 0) return res();
+    img.onload = () => res();
+    img.onerror = () => rej(new Error('portrait failed to load'));
+  });
+  // compute box
+  const imgAspect = img.naturalWidth / img.naturalHeight;
+  const boxW = Math.floor(outW * 0.68);
+  const boxH = Math.floor(outH * 0.6);
+  const sx = Math.floor((outW - boxW)/2);
+  const sy = Math.floor(outH * 0.12);
+
+  // draw rounded rect background
+  octx.fillStyle = 'rgba(255,255,255,0.95)';
+  roundRect(octx, sx-12, sy-12, boxW+24, boxH+24, 28);
+  octx.fill();
+
+  // draw portrait
+  // use cover style
+  let drawW = boxW, drawH = boxH;
+  if(imgAspect > boxW/boxH){
+    // image is wider, crop sides
+    drawH = boxH;
+    drawW = Math.round(boxH * imgAspect);
+  } else {
+    drawW = boxW;
+    drawH = Math.round(boxW / imgAspect);
+  }
+  const dx = sx - Math.round((drawW - boxW)/2);
+  const dy = sy - Math.round((drawH - boxH)/2);
+  octx.drawImage(img, dx, dy, drawW, drawH);
+
+  // overlay gentle vignette
+  const vign = octx.createRadialGradient(outW/2, outH/2, outW*0.2, outW/2, outH/2, outW);
+  vign.addColorStop(0,'rgba(0,0,0,0)');
+  vign.addColorStop(1,'rgba(0,0,0,0.12)');
+  octx.fillStyle = vign;
+  octx.fillRect(0,0,outW,outH);
+
+  // add greeting text in Great Vibes font (fallback)
+  octx.fillStyle = '#3a1f33';
+  octx.textAlign = 'center';
+  // big cursive
+  octx.font = '72px "Great Vibes", serif';
+  octx.fillText('Happy Birthday Rabia!', outW/2, outH*0.82);
+
+  // small cake + candle highlight
+  octx.font = '18px "Poppins", sans-serif';
+  octx.fillStyle = '#5a3a40';
+  octx.fillText('🎂 Wishing you a wonderful year ✨', outW/2, outH*0.88);
+
+  // final sparkle dots
+  for(let i=0;i<60;i++){
+    octx.globalAlpha = 0.6 * Math.random();
+    octx.fillStyle = ['#FFD6E8','#FFD7A6','#E6C1FF'][Math.floor(Math.random()*3)];
+    const rx = Math.random()*outW, ry = (outH*0.82) + (Math.random()*200 - 40);
+    const r = Math.random()*4;
+    octx.beginPath(); octx.arc(rx,ry,r,0,Math.PI*2); octx.fill();
+  }
+
+  // create PNG and download
+  const url = oc.toDataURL('image/png');
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'Rabia_birthday.png';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+
+  function roundRect(ctx,x,y,w,h,r){
+    ctx.beginPath();
+    ctx.moveTo(x+r, y);
+    ctx.arcTo(x+w, y, x+w, y+h, r);
+    ctx.arcTo(x+w, y+h, x, y+h, r);
+    ctx.arcTo(x, y+h, x, y, r);
+    ctx.arcTo(x, y, x+w, y, r);
+    ctx.closePath();
+  }
+}
+
+// small accessibility: let Enter/Space also click
+surpriseBtn.addEventListener('keydown', (e)=> {
+  if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); surpriseBtn.click(); }
+});
+
+// initial hint for keyboard users
+surpriseBtn.setAttribute('title','Tap or press Enter for the surprise');
+
+</script>
+</body>
+</html>
